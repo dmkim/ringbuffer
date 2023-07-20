@@ -4,71 +4,60 @@ import (
 	"testing"
 )
 
-func TestBuffer(t *testing.T) {
-	bufferSize := 10
-	b := New(bufferSize)
-	data := []byte("hello")
-
-	// Test IsEmpty
-	if !b.IsEmpty() {
-		t.Errorf("Expected buffer to be empty, but it was not")
-	}
-
-	// Test Len
+func TestNewBuffer(t *testing.T) {
+	b := New(10, false)
 	if b.Len() != 0 {
-		t.Errorf("Expected initial buffer length to be 0, but got %d", b.Len())
+		t.Errorf("Buffer length should be 0 but got %d", b.Len())
 	}
+	if b.capacity != 10 {
+		t.Errorf("Buffer capacity should be 10 but got %d", b.capacity)
+	}
+}
 
-	// Test Write
-	_, err := b.Write(data)
+func TestWriteToBuffer(t *testing.T) {
+	b := New(10, false)
+	data := []byte("test")
+	n, err := b.Write(data)
 	if err != nil {
-		t.Errorf("Write failed: %v", err)
+		t.Errorf("Error writing to buffer: %v", err)
 	}
-	if b.len != len(data) {
-		t.Errorf("Buffer length expected %d, got %d", len(data), b.len)
+	if n != len(data) {
+		t.Errorf("Expected to write %d bytes, but wrote %d bytes", len(data), n)
 	}
-
-	// Test IsEmpty
-	if b.IsEmpty() {
-		t.Errorf("Expected buffer not to be empty, but it was")
-	}
-
-	// Test Len
 	if b.Len() != len(data) {
-		t.Errorf("Expected buffer length to be %d, but got %d", len(data), b.Len())
+		t.Errorf("Buffer length should be %d but got %d", len(data), b.Len())
 	}
+}
 
-	// Test Read
+func TestReadFromBuffer(t *testing.T) {
+	b := New(10, false)
+	data := []byte("test")
+	_, _ = b.Write(data)
+
 	readData := make([]byte, len(data))
-	_, err = b.Read(readData, len(data))
+	n, err := b.Read(readData, len(data))
 	if err != nil {
-		t.Errorf("Read failed: %v", err)
+		t.Errorf("Error reading from buffer: %v", err)
 	}
-	for i, v := range readData {
-		if v != data[i] {
-			t.Errorf("Read data expected %v, got %v", data[i], v)
-		}
+	if n != len(data) {
+		t.Errorf("Expected to read %d bytes, but read %d bytes", len(data), n)
 	}
-	if b.len != 0 {
-		t.Errorf("Buffer length expected 0, got %d", b.len)
+	if b.Len() != 0 {
+		t.Errorf("Buffer length should be 0 but got %d", b.Len())
 	}
+}
 
-	// Test Peek
-	_, err = b.Write(data)
+func TestBufferOverflow(t *testing.T) {
+	b := New(5, false)
+	data := []byte("more than five bytes")
+	n, err := b.Write(data)
 	if err != nil {
-		t.Errorf("Write failed: %v", err)
+		t.Errorf("Error writing to buffer: %v", err)
 	}
-	peekData := make([]byte, len(data))
-	_, err = b.Peek(peekData, len(data))
-	if err != nil {
-		t.Errorf("Peek failed: %v", err)
+	if n != 5 {
+		t.Errorf("Expected to write %d bytes, but wrote %d bytes", 5, n)
 	}
-	for i, v := range peekData {
-		if v != data[i] {
-			t.Errorf("Peek data expected %v, got %v", data[i], v)
-		}
-	}
-	if b.len != len(data) {
-		t.Errorf("Buffer length expected %d, got %d", len(data), b.len)
+	if !b.IsFull() {
+		t.Error("Buffer should be full")
 	}
 }

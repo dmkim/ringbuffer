@@ -1,6 +1,6 @@
 # RingBuffer
 
-RingBuffer is a Go package providing a simple, efficient, data-agnostic and thread-safe implementation of a circular buffer, also known as a ring buffer. This data structure is especially useful in scenarios where there is a need for managing data streams or maintaining a rolling window of the last N items.
+RingBuffer is a Go package providing a simple, efficient, and data-agnostic implementation of a circular buffer, also known as a ring buffer. This data structure is especially useful in scenarios where there is a need for managing data streams or maintaining a rolling window of the last N items.
 
 ## Features
 - Adjustable Capacity: Supports dynamic resizing according to your needs.

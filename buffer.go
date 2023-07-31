@@ -130,26 +130,30 @@ func (b *Buffer) read(data []byte, dataLen int, shouldRemove bool) (n int, err e
 	n = dataLen
 	data = data[:dataLen]
 
+	var head = b.head
+	var length = b.length
+
 	for {
 		if dataLen = len(data); dataLen <= 0 {
 			break
 		}
 
 		var availableData int
-		if b.head < b.tail {
-			availableData = min(dataLen, b.tail-b.head)
+		if head < b.tail {
+			availableData = min(dataLen, b.tail-head)
 		} else {
-			availableData = min(dataLen, b.capacity-b.head)
+			availableData = min(dataLen, b.capacity-head)
 		}
 
-		copy(data, b.buf[b.head:b.head+availableData])
-
-		if shouldRemove {
-			b.head = (b.head + availableData) % b.capacity
-			b.length -= availableData
-		}
-
+		copy(data, b.buf[head:head+availableData])
+		head = (head + availableData) % b.capacity
+		length -= availableData
 		data = data[availableData:]
+	}
+
+	if shouldRemove {
+		b.head = head
+		b.length = length
 	}
 
 	return
@@ -178,6 +182,11 @@ func (b *Buffer) IsFull() bool {
 // Len returns the current length of the buffer.
 func (b *Buffer) Len() int {
 	return b.length
+}
+
+// Cap returns the current capacity of the buffer.
+func (b *Buffer) Cap() int {
+	return b.capacity
 }
 
 // increaseCapacity increases the capacity of the buffer.
